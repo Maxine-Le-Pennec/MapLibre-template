@@ -9,7 +9,6 @@ export default function MapReactGL() {
   const [map, setMap] = useState(null)
   const [allData, setAllData] = useState(null)
   const [hoverInfo, setHoverInfo] = useState(null)
-  const [previousId, setPreviousId] = useState(hoveredStateId)
   const [viewport, setViewport] = useState({
     longitude: 1.85,
     latitude: 46.6167,
@@ -45,25 +44,24 @@ export default function MapReactGL() {
     setHoverInfo({name})
 
     if (hoveredFeature) {
-      if (hoveredFeature.id !== previousId) {
+      if (hoveredFeature.id !== hoveredStateId) {
         map.setFeatureState(
-          {source: 'regions', id: previousId},
+          {source: 'regions', id: hoveredStateId},
           {hover: false}
         )
       }
 
       hoveredStateId = hoveredFeature.id
-      setPreviousId(hoveredStateId)
       map.setFeatureState(
         {source: 'regions', id: hoveredStateId},
         {hover: true}
       )
     }
-  }, [map, previousId])
+  }, [map])
 
   const onMouseLeave = () => {
     map.setFeatureState(
-      {source: 'regions', id: previousId},
+      {source: 'regions', id: hoveredStateId},
       {hover: false}
     )
   }
