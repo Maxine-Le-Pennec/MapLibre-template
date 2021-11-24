@@ -1,0 +1,60 @@
+{
+  "name": "mapgltest",
+  "version": "1.0.0",
+  "description": "",
+  "main": "",
+  "repository": "",
+  "author": "Maxine",
+  "license": "libre",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "xo"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.15.4",
+    "babel-plugin-lodash": "^3.3.4",
+    "lodash": "^4.17.21",
+    "maplibre-gl": "^1.15.2",
+    "next": "^11.1.2",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-map-gl": "^6.1.17"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.15.5",
+    "@babel/eslint-parser": "^7.15.7",
+    "@babel/plugin-proposal-class-properties": "^7.16.0",
+    "@next/bundle-analyzer": "^11.1.2",
+    "eslint": "^7.32.0",
+    "eslint-config-xo-nextjs": "^3.2.0",
+    "xo": "^0.39.1"
+  },
+  "xo": {
+    "extends": "xo-nextjs",
+    "parser": "@babel/eslint-parser",
+    "semicolon": false,
+    "space": 2,
+    "envs": [
+      "browser",
+      "es2021"
+    ],
+    "rules": {
+      "camelcase": "warn",
+      "unicorn/catch-error-name": "off",
+      "react/jsx-sort-props": "off",
+      "import/no-anonymous-default-export": "off",
+      "unicorn/prevent-abbreviations": "off",
+      "comma-dangle": "off",
+      "import/extensions": "off",
+      "node/prefer-global/process": "off",
+      "unicorn/no-array-for-each": "off",
+      "unicorn/prefer-switch": "off"
+    }
+  },
+  "engines": {
+    "node": ">=14 <17"
+  }
+}
