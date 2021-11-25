@@ -1,5 +1,5 @@
 import {useState, useEffect, useCallback} from 'react'
-import ReactMapGL, {Source, Layer} from 'react-map-gl'
+import ReactMapGL, {Source, Layer, Popup} from 'react-map-gl'
 
 import {regionsContour, regionFill} from '../style/map-styles'
 
@@ -16,6 +16,8 @@ export default function MapReactGL() {
     bearing: 0,
     pitch: 0
   })
+
+  const isOutsideFrance = !(hoverInfo && hoverInfo.name)
 
   const mapRef = useCallback(ref => {
     if (ref) {
@@ -38,12 +40,19 @@ export default function MapReactGL() {
   }, [])
 
   const onHover = useCallback(event => {
-    const {features} = event
+    const {features, lngLat} = event
     const hoveredFeature = features && features[0]
-    const name = hoveredFeature ? hoveredFeature.properties.nom : null
-    setHoverInfo({name})
 
     if (hoveredFeature) {
+      setHoverInfo(
+        {
+          name: hoveredFeature.properties.nom,
+          code: hoveredFeature.properties.code,
+          x: lngLat[0],
+          y: lngLat[1]
+        }
+      )
+
       if (hoveredFeature.id !== hoveredStateId) {
         map.setFeatureState(
           {source: 'regions', id: hoveredStateId},
@@ -64,6 +73,7 @@ export default function MapReactGL() {
       {source: 'regions', id: hoveredStateId},
       {hover: false}
     )
+    setHoverInfo(null)
   }
 
   return (
@@ -84,11 +94,31 @@ export default function MapReactGL() {
         <Layer {...regionFill} />
       </Source>
 
-      {hoverInfo && (
-        <div className='tooltip' style={{left: hoverInfo.x, top: hoverInfo.y}}>
-          <div>Département: {hoverInfo.name}</div>
-        </div>
-      )}
+      {!isOutsideFrance && (
+        <Popup
+          latitude={hoverInfo.y}
+          longitude={hoverInfo.x}
+          closeButton={false}
+          anchor='bottom'
+        >
+          <div className='tooltip' style={{left: hoverInfo.x, top: hoverInfo.y}}>
+            <div>Département: {hoverInfo.name}</div>
+            <div>Code : {hoverInfo.code}</div>
+
+            <style jsx>{`
+              .tooltip {
+                background: #343332;
+                color: white;
+                padding: 1em;
+                margin: -1em;
+                border-radius: 10px;
+                display: flex;
+                flex-direction: column;
+                gap: 1em;
+              }
+            `}</style>
+          </div>
+        </Popup>)}
     </ReactMapGL>
   )
 }
