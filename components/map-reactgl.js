@@ -19,12 +19,14 @@ export default function MapReactGL() {
 
   const isOutsideFrance = !(hoverInfo && hoverInfo.name)
 
+  // Create a ref to access mapbox map object
   const mapRef = useCallback(ref => {
     if (ref) {
       setMap(ref.getMap())
     }
   }, [setMap])
 
+  // Fetch geojson
   const fetchData = async () => {
     const res = await fetch('https://france-geojson.gregoiredavid.fr/repo/departements.geojson')
     const data = await res.json()
@@ -43,16 +45,18 @@ export default function MapReactGL() {
     const {features, lngLat} = event
     const hoveredFeature = features && features[0]
 
-    if (hoveredFeature) {
+    if (hoveredFeature) { // DOM need to be mount !
       setHoverInfo(
         {
           name: hoveredFeature.properties.nom,
           code: hoveredFeature.properties.code,
+          // Get longitude and latitude for popup
           x: lngLat[0],
           y: lngLat[1]
         }
       )
 
+      // Change style if not hovered anymore
       if (hoveredFeature.id !== hoveredStateId) {
         map.setFeatureState(
           {source: 'regions', id: hoveredStateId},
@@ -60,6 +64,7 @@ export default function MapReactGL() {
         )
       }
 
+      // Change style if hover
       hoveredStateId = hoveredFeature.id
       map.setFeatureState(
         {source: 'regions', id: hoveredStateId},
@@ -69,6 +74,7 @@ export default function MapReactGL() {
   }, [map])
 
   const onMouseLeave = () => {
+    // When mouse leave the geojson delimited zone, empty data to undisplay popup
     map.setFeatureState(
       {source: 'regions', id: hoveredStateId},
       {hover: false}
@@ -118,7 +124,8 @@ export default function MapReactGL() {
               }
             `}</style>
           </div>
-        </Popup>)}
+        </Popup>
+      )}
     </ReactMapGL>
   )
 }
