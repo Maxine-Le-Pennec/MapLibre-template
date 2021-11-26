@@ -57,7 +57,7 @@ export default function MapReactGL() {
       )
 
       // Change style if not hovered anymore
-      if (hoveredFeature.id !== hoveredStateId) {
+      if (hoveredStateId && hoveredFeature.id !== hoveredStateId) {
         map.setFeatureState(
           {source: 'regions', id: hoveredStateId},
           {hover: false}
