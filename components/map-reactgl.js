@@ -1,5 +1,5 @@
 import {useState, useEffect, useCallback} from 'react'
-import ReactMapGL, {Source, Layer, Popup} from 'react-map-gl'
+import ReactMapGL, {Source, Layer, Popup, NavigationControl} from 'react-map-gl'
 
 import {regionsContour, regionFill} from '../style/map-styles'
 
@@ -96,6 +96,7 @@ export default function MapReactGL() {
       interactiveLayerIds={['regionFill']}
     >
       <Source type='geojson' data={allData} id='regions' generateId>
+        <NavigationControl />
         <Layer {...regionsContour} />
         <Layer {...regionFill} />
       </Source>
