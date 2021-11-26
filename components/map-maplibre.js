@@ -20,8 +20,16 @@ export default function MapLibre() {
       zoom: 5.3,
     })
 
+    const popup = new maplibregl.Popup({
+      closeButton: false,
+      closeOnClick: false
+    })
+
     const onMouseMove = e => {
-      if (e.features.length > 0) {
+      const {features, lngLat} = e
+      const hoveredFeature = features && features[0]
+
+      if (features.length > 0) {
         if (hoveredStateId !== null) {
           map.setFeatureState(
             {source: 'regions', id: hoveredStateId},
@@ -29,12 +37,18 @@ export default function MapLibre() {
           )
         }
 
-        hoveredStateId = e.features[0].id
+        hoveredStateId = hoveredFeature.id
         map.setFeatureState(
           {source: 'regions', id: hoveredStateId},
           {hover: true}
         )
       }
+
+      map.getCanvas().style.cursor = 'pointer'
+
+      const {nom} = e.features[0].properties
+      const departement = `<p>Département: ${nom}</p>`
+      popup.setLngLat(lngLat).setHTML(departement).addTo(map)
     }
 
     const onMouseLeave = () => {
@@ -46,6 +60,8 @@ export default function MapLibre() {
       }
 
       hoveredStateId = null
+      map.getCanvas().style.cursor = ''
+      popup.remove()
     }
 
     map.on('mousemove', 'departements', onMouseMove)
@@ -126,7 +142,7 @@ export default function MapLibre() {
       <style jsx>{`
         .map-container {
           height: 100vh;
-          width: 100vw;
+          width: auto;
         }
       `}</style>
     </div>
