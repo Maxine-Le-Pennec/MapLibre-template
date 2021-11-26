@@ -9,6 +9,7 @@ export default function MapReactGL() {
   const [map, setMap] = useState(null)
   const [allData, setAllData] = useState(null)
   const [hoverInfo, setHoverInfo] = useState(null)
+  const [error, setError] = useState(null)
   const [viewport, setViewport] = useState({
     longitude: 1.85,
     latitude: 46.6167,
@@ -28,17 +29,20 @@ export default function MapReactGL() {
 
   // Fetch geojson
   const fetchData = async () => {
-    const res = await fetch('https://france-geojson.gregoiredavid.fr/repo/departements.geojson')
-    const data = await res.json()
-    setAllData(data)
+    let error = null
+    try {
+      const res = await fetch('https://france-geojson.gregoiredavid.fr/repo/departements.geojson')
+      const data = await res.json()
+      setAllData(data)
+    } catch {
+      error = 'Data cannot be fetched'
+    }
+
+    setError(error)
   }
 
   useEffect(() => {
-    try {
-      fetchData()
-    } catch (error) {
-      console.error(error)
-    }
+    fetchData()
   }, [])
 
   const onHover = useCallback(event => {
@@ -82,7 +86,7 @@ export default function MapReactGL() {
     setHoverInfo(null)
   }
 
-  return (
+  return error ? <div>{error}</div> : (
     <ReactMapGL
       mapboxApiAccessToken={process.env.NEXT_PUBLIC_MAPGL_API_KEY}
       {...viewport}

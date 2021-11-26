@@ -9,6 +9,7 @@ let map = null
 
 export default function MapLibre() {
   const [isDataLoaded, setIsDataLoaded] = useState(false)
+  const [error, setError] = useState(null)
   const mapContainer = useRef(null)
 
   useEffect(() => {
@@ -59,41 +60,48 @@ export default function MapLibre() {
 
   // Fetch geojson
   const fetchData = async () => {
-    const res = await fetch('https://france-geojson.gregoiredavid.fr/repo/departements.geojson')
-    const data = await res.json()
+    let error = null
+    try {
+      const res = await fetch('https://france-geojson.gregoiredavid.fr/repo/departements.geojson')
+      const data = await res.json()
 
-    map.addSource('regions', {
-      type: 'geojson',
-      data,
-      generateId: true
-    })
+      map.addSource('regions', {
+        type: 'geojson',
+        data,
+        generateId: true
+      })
 
-    map.addLayer({
-      id: 'france',
-      type: 'line',
-      source: 'regions',
-      paint: {
-        'line-color': '#376663',
-        'line-width': 1
-      }
-    })
+      map.addLayer({
+        id: 'france',
+        type: 'line',
+        source: 'regions',
+        paint: {
+          'line-color': '#376663',
+          'line-width': 1
+        }
+      })
 
-    map.addLayer({
-      id: 'departements',
-      type: 'fill',
-      source: 'regions',
-      paint: {
-        'fill-color': '#088',
-        'fill-opacity': [
-          'case',
-          ['boolean', ['feature-state', 'hover'], false],
-          1,
-          0.5
-        ]
-      }
-    })
+      map.addLayer({
+        id: 'departements',
+        type: 'fill',
+        source: 'regions',
+        paint: {
+          'fill-color': '#088',
+          'fill-opacity': [
+            'case',
+            ['boolean', ['feature-state', 'hover'], false],
+            1,
+            0.5
+          ]
+        }
+      })
 
-    setIsDataLoaded(true)
+      setIsDataLoaded(true)
+    } catch {
+      error = 'Data cannot be fetched'
+    }
+
+    setError(error)
   }
 
   useEffect(() => {
@@ -109,7 +117,11 @@ export default function MapLibre() {
 
   return (
     <div>
-      <div ref={mapContainer} className='map-container' />
+      {error ? (
+        <div>{error}</div>
+      ) : (
+        <div ref={mapContainer} className='map-container' />
+      )}
 
       <style jsx>{`
         .map-container {
