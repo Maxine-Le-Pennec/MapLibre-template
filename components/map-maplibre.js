@@ -1,102 +1,111 @@
 import {useRef, useEffect, useState} from 'react'
-import maplibregl from '!maplibre-gl' // eslint-disable-line import/no-webpack-loader-syntax
+import maplibregl from 'maplibre-gl'
 
 import vector from '../vector.json'
-maplibregl.accessToken = process.env.NEXT_PUBLIC_MAPGL_API_KEY
 
+maplibregl.accessToken = process.env.NEXT_PUBLIC_MAPGL_API_KEY
 let hoveredStateId = null
+let map = null
 
 export default function MapLibre() {
-  const [data, setData] = useState(null)
+  const [isDataLoaded, setIsDataLoaded] = useState(false)
   const mapContainer = useRef(null)
-  const map = useRef(null)
 
   useEffect(() => {
-    if (map.current) {
-      map.current.addSource('regions', {
-        type: 'geojson',
-        data,
-        generateId: true
-      })
+    map = new maplibregl.Map({
+      container: mapContainer.current,
+      style: vector,
+      center: [1.85, 46.6167],
+      zoom: 5.3,
+    })
 
-      map.current.addLayer({
-        id: 'france',
-        type: 'line',
-        source: 'regions',
-        paint: {
-          'line-color': '#376663',
-          'line-width': 1
-        }
-      })
-
-      map.current.addLayer({
-        id: 'departements',
-        type: 'fill',
-        source: 'regions',
-        paint: {
-          'fill-color': '#088',
-          'fill-opacity': [
-            'case',
-            ['boolean', ['feature-state', 'hover'], false],
-            1,
-            0.5
-          ]
-        }
-      })
-
-      map.current.on('mousemove', 'departements', e => {
-        console.log(e)
-        if (e.features.length > 0) {
-          if (hoveredStateId !== null) {
-            map.current.setFeatureState(
-              {source: 'region', id: hoveredStateId},
-              {hover: false}
-            )
-          }
-
-          hoveredStateId = e.features[0].id
-          map.current.setFeatureState(
-            {source: 'regions', id: hoveredStateId},
-            {hover: true}
-          )
-        }
-      })
-
-      map.current.on('mouseleave', 'departements', () => {
+    const onMouseMove = e => {
+      if (e.features.length > 0) {
         if (hoveredStateId !== null) {
-          map.current.setFeatureState(
+          map.setFeatureState(
             {source: 'regions', id: hoveredStateId},
             {hover: false}
           )
         }
 
-        hoveredStateId = null
-      })
+        hoveredStateId = e.features[0].id
+        map.setFeatureState(
+          {source: 'regions', id: hoveredStateId},
+          {hover: true}
+        )
+      }
     }
 
-    map.current = new maplibregl.Map({
-      container: mapContainer.current,
-      style: vector,
-      center: [1.85, 46.6167],
-      zoom: 5.3,
-      source: {data}
-    })
-  })
+    const onMouseLeave = () => {
+      if (hoveredStateId !== null) {
+        map.setFeatureState(
+          {source: 'regions', id: hoveredStateId},
+          {hover: false}
+        )
+      }
+
+      hoveredStateId = null
+    }
+
+    map.on('mousemove', 'departements', onMouseMove)
+    map.on('mouseleave', 'departements', onMouseLeave)
+
+    // Removes previously registered event listeners to avoid memory leaks
+    return () => {
+      map.off('mousemove', 'departements', onMouseMove)
+      map.off('mouseleave', 'departements', onMouseLeave)
+    }
+  }, [])
 
   // Fetch geojson
   const fetchData = async () => {
     const res = await fetch('https://france-geojson.gregoiredavid.fr/repo/departements.geojson')
     const data = await res.json()
-    setData(data)
+
+    map.addSource('regions', {
+      type: 'geojson',
+      data,
+      generateId: true
+    })
+
+    map.addLayer({
+      id: 'france',
+      type: 'line',
+      source: 'regions',
+      paint: {
+        'line-color': '#376663',
+        'line-width': 1
+      }
+    })
+
+    map.addLayer({
+      id: 'departements',
+      type: 'fill',
+      source: 'regions',
+      paint: {
+        'fill-color': '#088',
+        'fill-opacity': [
+          'case',
+          ['boolean', ['feature-state', 'hover'], false],
+          1,
+          0.5
+        ]
+      }
+    })
+
+    setIsDataLoaded(true)
   }
 
   useEffect(() => {
     try {
-      fetchData()
+      // If map is created and data aren't loaded, fetch datas and set souces and layers to the map
+      if (map && !isDataLoaded) {
+        fetchData()
+      }
     } catch (error) {
       console.error(error)
     }
-  }, [])
+  }, [isDataLoaded])
 
   return (
     <div>
