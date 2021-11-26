@@ -90,7 +90,7 @@ export default function MapReactGL() {
     <ReactMapGL
       mapboxApiAccessToken={process.env.NEXT_PUBLIC_MAPGL_API_KEY}
       {...viewport}
-      width='100vw'
+      width='auto'
       height='100vh'
       onViewportChange={setViewport}
       mapStyle='mapbox://styles/mapbox/light-v9'
