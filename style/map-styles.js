@@ -3,7 +3,7 @@ export const regionsContour = {
   source: 'regions',
   type: 'line',
   paint: {
-    'line-color': '#627BC1'
+    'line-color': '#2053B3'
   }
 }
 
@@ -13,7 +13,7 @@ export const regionFill = {
   source: 'regions',
   paint: {
     'fill-outline-color': '#484896',
-    'fill-color': '#6e599f',
+    'fill-color': '#2053B3',
     'fill-opacity': [
       'case',
       ['boolean', ['feature-state', 'hover'], false],
